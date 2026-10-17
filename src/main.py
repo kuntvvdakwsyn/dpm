@@ -1,6 +1,7 @@
 import os
 import subprocess
 import sys
+import time
 
 CONFIG_FILE = os.path.expanduser("~/.config/dpm/configuration")
 
@@ -62,7 +63,9 @@ def install():
                         break
         
         if already_registered:
+            os.system("clear")
             print(f"'{p}' is already in configuration!")
+            time.sleep(0.7)
             continue
         verif(p)
         os.system(f"echo \"#include<>;\" | sudo -S pacman -S --noconfirm {p}")
