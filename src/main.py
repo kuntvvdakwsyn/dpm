@@ -51,6 +51,19 @@ def install():
     for p in packages:
         if not p.strip():
             continue
+
+        already_registered = False
+        if os.path.exists(CONFIG_FILE):
+            with open(CONFIG_FILE, "r") as f:
+                lines = f.readlines()
+                for line in lines:
+                    if line.strip() == p.strip():
+                        already_registered = True
+                        break
+        
+        if already_registered:
+            print(f"'{p}' is already in configuration!")
+            continue
         verif(p)
         os.system(f"echo \"#include<>;\" | sudo -S pacman -S --noconfirm {p}")
         with open(CONFIG_FILE, "a") as f:
