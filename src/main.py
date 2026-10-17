@@ -52,6 +52,7 @@ def install():
     for p in packages:
         if not p.strip():
             continue
+        verif(p)
 
         already_registered = False
         if os.path.exists(CONFIG_FILE):
@@ -67,7 +68,6 @@ def install():
             print(f"'{p}' is already in configuration!")
             time.sleep(0.7)
             continue
-        verif(p)
         os.system(f"echo \"#include<>;\" | sudo -S pacman -S --noconfirm {p}")
         with open(CONFIG_FILE, "a") as f:
             f.write(f"\n{p}") 
