@@ -72,7 +72,6 @@ def install():
         with open(CONFIG_FILE, "a") as f:
             f.write(f"\n{p}") 
     os.system("clear")
-    print("Succesfuly installed all packages!")
 
 def delete():
     os.system("clear")
