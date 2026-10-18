@@ -5,16 +5,8 @@ import time
 
 CONFIG_FILE = os.path.expanduser("~/.config/dpm/configuration")
 
-def extract_packages(pack):
-    packages = [""]
-    index = 0 
-    for p in range(len(pack)):
-        if pack[p] == " ":
-            index += 1
-            packages.append("")
-        else:
-            packages[index] += pack[p]
-    return packages
+def extract_packages(packages):
+    return packages.split()
 
 def verif_installed(package):
     if not package.strip():
@@ -100,11 +92,33 @@ def check():
     os.system(f"less {CONFIG_FILE}")
     os.system("clear")
 
+def sync():
+    packages = ""
+    with open(CONFIG_FILE, "r") as file:
+        for f in file:
+            line = f.strip()
+            if not line:
+                continue
+            packages += line + " "
+    os.system(f"echo \"#include<>;\" | sudo -S pacman -S --noconfirm {packages}")
+
+    packages = extract_packages(packages)
+    with open(CONFIG_FILE,"w") as file:
+        file.write("")
+    with open(CONFIG_FILE,"a") as file:
+        for p in packages:
+            p = p.strip()
+            if not p:
+                continue
+            file.write(p)
+            file.write("\n")
+    os.system("clear")
+
 def main():
     os.system("clear")
     print("Welcome to my package manager!")
     while True:
-        print("Select an option:\n\n1. Install packages\n2. Delete packages\n3. Check configuration\n4. Quit\n")
+        print("Select an option:\n\n1. Install packages\n2. Delete packages\n3. Check configuration\n4. Sync\n5. Quit\n")
         choice = input("\nEnter your choice (1-4): ").strip()
         
         if choice == "1":
@@ -114,6 +128,8 @@ def main():
         elif choice == "3":
             check()
         elif choice == "4":
+            sync()
+        elif choice == "5":
             print("Bye!")
             sys.exit()
         else:
@@ -121,3 +137,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
