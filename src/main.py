@@ -130,7 +130,7 @@ def main():
     print("Welcome to my package manager!")
     while True:
         print("Select an option:\n\n1. Install packages\n2. Delete packages\n3. Check configuration\n4. Sync\n5. Quit\n")
-        choice = input("\nEnter your choice (1-6): ").strip()
+        choice = input("\nEnter your choice (1-5): ").strip()
 
         if choice == "1": 
             install()
