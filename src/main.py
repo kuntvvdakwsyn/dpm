@@ -3,6 +3,7 @@ import subprocess
 import sys
 import time
 
+password = "PASSWD"
 CONFIG_FILE = os.path.expanduser("~/.config/dpm/configuration")
 
 def extract_packages(packages):
@@ -64,7 +65,7 @@ def install():
             time.sleep(0.7)
             continue
 
-        os.system(f"echo \"#include<>;\" | sudo -S pacman -S --noconfirm {p}")
+        os.system(f"echo \"{password}\" | sudo -S pacman -S --noconfirm {p}")
         
         os.makedirs(os.path.dirname(CONFIG_FILE), exist_ok=True)
         with open(CONFIG_FILE, "a") as f:
@@ -84,7 +85,7 @@ def delete():
             time.sleep(0.7)
             continue
         verif_installed(p)
-        os.system(f"echo \"#include<>;\" | sudo -S pacman -Rns --noconfirm {p}")
+        os.system(f"echo \"{password}\" | sudo -S pacman -Rns --noconfirm {p}")
 
         if os.path.exists(CONFIG_FILE):
             with open(CONFIG_FILE, "r") as f:
@@ -110,7 +111,7 @@ def sync():
             if not line:
                 continue
             packages += line + " "
-    os.system(f"echo \"#include<>;\" | sudo -S pacman -S --noconfirm {packages}")
+    os.system(f"echo \"{password}\" | sudo -S pacman -S --noconfirm {packages}")
 
     packages = extract_packages(packages)
     with open(CONFIG_FILE,"w") as file:
