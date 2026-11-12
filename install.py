@@ -1,37 +1,51 @@
-import os
-import sys
+#!/usr/bin/env python3
+"""Install DPM for Arch Linux or Void Linux."""
 
-def change_file(path,symb,symb1):
-    with open(path,"r") as r:
-        file = r.read()
-    new_file = file.replace(symb,symb1)
-    with open(path,"w") as w:
-        w.write(new_file)
+import shutil
+import subprocess
+import tempfile
+from pathlib import Path
 
-os.system('clear')
-print("Welcome to my package manager installer")
-passwd = input("[sudo] password").strip()
+ROOT = Path(__file__).resolve().parent
+SOURCE_DIR = ROOT / "src"
+CONFIG_DIR = Path.home() / ".config" / "dpm"
 
-confirm = input("Directory \"~/.config/dpm\" will be deleted, write [y/n] to confirm: ").lower().strip()
-if confirm == "y":
-    os.system("rm -rf ~/.config/dpm")
-    os.system("mkdir -p ~/.config/dpm")
 
-    change_file("src/main.py","PASSWD",passwd)
+def choose_distro():
+    while True:
+        distro = input("Which distribution are you using? [arch/void]: ").strip().lower()
+        if distro in {"arch", "void"}:
+            return distro
+        print("Please enter 'arch' or 'void'.")
 
-    os.system("mv src/main.py ~/.config/dpm/main.py")
-    os.system("mv src/configuration ~/.config/dpm/configuration")
 
-    print("Setting up system command 'dpm'...")
+def main():
+    distro = choose_distro()
+    source = SOURCE_DIR / f"{distro}.py"
+    if not source.is_file():
+        raise SystemExit(f"Backend not found: {source}")
 
-    with open("dpm_launcher", "w") as f:
-        f.write("#!/bin/bash\n")
-        f.write("python3 ~/.config/dpm/main.py \"$@\"\n")
+    CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(source, CONFIG_DIR / f"{distro}.py")
+    # Keep the existing package list instead of deleting the user's configuration.
+    config_file = CONFIG_DIR / "configuration"
+    if not config_file.exists():
+        shutil.copy2(SOURCE_DIR / "configuration", config_file)
 
-    os.system("chmod +x dpm_launcher")
-    os.system(f"echo \"{passwd}\" | sudo -S mv dpm_launcher /usr/local/bin/dpm")
-    
-    print("Installation complete! Type 'dpm' anywhere.")
-else:
-    print("Bye..")
-    sys.exit()
+    launcher = f"#!/bin/sh\nexec python3 \"$HOME/.config/dpm/{distro}.py\" \"$@\"\n"
+    with tempfile.NamedTemporaryFile("w", encoding="utf-8", delete=False) as handle:
+        handle.write(launcher)
+        launcher_path = Path(handle.name)
+
+    try:
+        subprocess.run(["sudo", "install", "-m", "755", str(launcher_path), "/usr/local/bin/dpm"], check=True)
+    except (subprocess.CalledProcessError, FileNotFoundError) as error:
+        raise SystemExit(f"Could not install /usr/local/bin/dpm: {error}") from error
+    finally:
+        launcher_path.unlink(missing_ok=True)
+
+    print(f"DPM installed for {distro.title()}. Run 'dpm' to start it.")
+
+
+if __name__ == "__main__":
+    main()
